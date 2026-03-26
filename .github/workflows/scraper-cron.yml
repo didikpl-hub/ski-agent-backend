@@ -2,7 +2,7 @@ name: Run scraper every hour
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"   # co godzinę
   workflow_dispatch:
 
 jobs:
@@ -10,19 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Pobranie repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # 3. Instalacja zależności
       - name: Install dependencies
         run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
-          playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium
 
+      # 4. Uruchom scrapera
       - name: Run scraper
+        env:
+          BLOB_CONNECTION_STRING: ${{ secrets.BLOB_CONNECTION_STRING }}
         run: |
           python run_scraper.py
